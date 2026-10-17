@@ -1,0 +1,46 @@
+name: Compile ModDash Binaries
+
+on: [push, pull_request]
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            artifact-name: Android-Linux-so
+          - os: windows-latest
+            artifact-name: Windows-dll
+          - os: macos-latest
+            artifact-name: Mac-dylib
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - uses: actions/checkout@v4
+
+    # 1. Setup Android NDK strictly on the Ubuntu runner to build the .so file
+    - name: Set up Android NDK
+      if: matrix.os == 'ubuntu-latest'
+      uses: nttld/setup-ndk@v1
+      with:
+        ndk-version: r25c
+
+    # 2. Configure the build environment
+    - name: Configure CMake
+      run: cmake -B build -DCMAKE_BUILD_TYPE=Release
+
+    # 3. Compile the binaries
+    - name: Build ModDash
+      run: cmake --build build --config Release
+
+    # 4. Save and export your .so, .dll, and .dylib files
+    - name: Upload Binary Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: ModDash-${{ matrix.artifact-name }}
+        path: |
+          build/**/*.so
+          build/**/*.dll
+          build/**/*.dylib

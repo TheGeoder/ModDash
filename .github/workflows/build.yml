@@ -6,14 +6,12 @@ jobs:
   build:
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        os: [ubuntu-latest, windows-latest]
         include:
           - os: ubuntu-latest
             artifact-name: Android-Linux-so
           - os: windows-latest
             artifact-name: Windows-dll
-          - os: macos-latest
-            artifact-name: Mac-dylib
 
     runs-on: ${{ matrix.os }}
 
@@ -35,7 +33,7 @@ jobs:
     - name: Build ModDash
       run: cmake --build build --config Release
 
-    # 4. Save and export your .so, .dll, and .dylib files
+    # 4. Save and export only your .so and .dll files
     - name: Upload Binary Artifacts
       uses: actions/upload-artifact@v4
       with:
@@ -43,4 +41,4 @@ jobs:
         path: |
           build/**/*.so
           build/**/*.dll
-          build/**/*.dylib
+
